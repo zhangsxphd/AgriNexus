@@ -239,15 +239,16 @@ export function MiniTrend({ values, tone = 'sky', frameless = false, className =
   );
 }
 
-export function MetricTile({ label, value, unit, status, tone = 'slate', trend, series, variant = 'default' }) {
+export function MetricTile({ label, value, unit, status, tone = 'slate', trend, series, valueGroups, variant = 'default' }) {
   const style = getTone(tone);
   const isSquare = variant === 'square';
+  const hasValueGroups = Array.isArray(valueGroups) && valueGroups.length > 0;
 
   return (
     <div
       className={[
         `group relative overflow-hidden rounded-[24px] border ${style.border} bg-white shadow-[0_16px_40px_-30px_rgba(15,23,42,0.35)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_50px_-32px_rgba(15,23,42,0.42)]`,
-        isSquare ? 'min-h-[208px] p-3.5' : 'p-4 lg:p-4.5',
+        isSquare ? 'aspect-square min-h-[198px] p-3.5' : 'p-4 lg:p-4.5',
       ].join(' ')}
     >
       <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${style.soft} opacity-70`} />
@@ -257,12 +258,28 @@ export function MetricTile({ label, value, unit, status, tone = 'slate', trend, 
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className={`${isSquare ? 'text-[13px]' : 'text-sm'} font-semibold tracking-tight text-slate-600`}>{label}</p>
-            <div className={isSquare ? 'mt-2.5' : 'mt-3'}>
-              <div className="flex flex-wrap items-end gap-x-2 gap-y-1">
-                <span className={`${isSquare ? 'text-[1.75rem]' : 'text-[2rem]'} font-semibold leading-none tracking-tight text-slate-950`}>{value}</span>
-                {unit ? <span className={`${isSquare ? 'text-[0.72rem]' : 'text-[0.78rem]'} whitespace-nowrap font-medium text-slate-500`}>{unit}</span> : null}
+            {hasValueGroups ? (
+              <div className={isSquare ? 'mt-2.5 space-y-2' : 'mt-3 space-y-2'}>
+                <div className="grid grid-cols-3 gap-2">
+                  {valueGroups.map((item) => (
+                    <div key={item.label} className="rounded-[14px] border border-white/75 bg-white/65 px-2 py-1.5">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">{item.label}</p>
+                      <p className={`${isSquare ? 'text-[1.05rem]' : 'text-[1.2rem]'} mt-1 font-semibold leading-none tracking-tight text-slate-950`}>
+                        {item.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                {unit ? <p className={`${isSquare ? 'text-[0.72rem]' : 'text-[0.78rem]'} font-medium text-slate-500`}>{unit}</p> : null}
               </div>
-            </div>
+            ) : (
+              <div className={isSquare ? 'mt-2.5' : 'mt-3'}>
+                <div className="flex flex-wrap items-end gap-x-2 gap-y-1">
+                  <span className={`${isSquare ? 'text-[1.75rem]' : 'text-[2rem]'} font-semibold leading-none tracking-tight text-slate-950`}>{value}</span>
+                  {unit ? <span className={`${isSquare ? 'text-[0.72rem]' : 'text-[0.78rem]'} whitespace-nowrap font-medium text-slate-500`}>{unit}</span> : null}
+                </div>
+              </div>
+            )}
           </div>
           <StatusBadge tone={getStatusTone(status)} className="whitespace-nowrap px-2.5 py-1 text-[11px] leading-none">
             {status}

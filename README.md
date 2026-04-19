@@ -1,178 +1,192 @@
 # 田智枢 AgriNexus
 
-设施农业智能决策平台，一个基于 `React + Fastify + SQLite` 的前后端分离全栈项目。  
-项目围绕设施农业场景，提供首页驾驶舱、棚室管理、报警中心、试验管理、数据分析、系统设置等模块，用于展示棚室运行状态、报警联动、决策建议和基础运维配置。
+田间科研试验监测与决策平台。
 
-当前版本以“高保真原型恢复 + 可运行全栈骨架”为核心目标，优先保证：
+`AgriNexus` 当前定位为一套面向稻田科研试验的 Web 平台原型与可运行全栈骨架，强调：
 
-- 界面与演示稿一致
-- 示例数据可直接展示
-- 关键交互可操作
-- 后端服务、数据库和前端工程结构完整清晰
-- 后续继续扩展时不需要推倒重来
+- 全生育期连续监测
+- 主—再关键期专题分析
+- 试验执行与样品管理
+- 预警联动与决策支持
+- 物联网设备与网关工程视图
 
-## 项目亮点
+当前仓库已经从早期的通用设施农业演示项目，重构为一套更贴近田间科研试验场景的中文桌面端平台。
 
-- 前后端分离：
-  - 前端使用 `Vite + React 18 + React Router + Tailwind CSS`
-  - 后端使用 `Fastify + better-sqlite3 + SQLite`
-- 支持真实本地数据库：
-  - SQLite 建表、种子、重置、校验脚本已内置
-- 支持演示态优先：
-  - 首页、棚室管理、报警中心默认优先显示演示示例数据
-  - 即使后端暂不可用，页面也不会空白
-- 支持基础业务交互：
-  - 首页决策执行/忽略
-  - 棚室详细数据、设备控制、新增棚室
-  - 报警处理、批量处理、导出记录
-  - 系统设置多分区配置及持久化
+## 当前定位
+
+平台采用“两层结构”：
+
+- 通用平台层：
+  首页、田间监测、试验管理、数据分析、预警中心、设备与网关、系统设置
+- 专题分析层：
+  当前专题为“主—再关键期：水分调控与再生响应”，入口位于“试验管理”页面内部
+
+当前 UI 重点围绕再生稻试验进行演示，但底层结构按通用科研平台组织，没有把专题逻辑写死到全部页面中。
 
 ## 技术栈
 
 ### 前端
 
-- `Vite`
+- `Vite 8`
 - `React 18`
-- `react-router-dom`
-- `axios`
+- `React Router`
 - `Tailwind CSS`
+- `axios`
 - `lucide-react`
 
 ### 后端
 
 - `Node.js`
-- `Fastify`
+- `Fastify 5`
 - `@fastify/cors`
 - `better-sqlite3`
 - `SQLite`
 
-## 功能模块
+## 当前页面
 
 ### 1. 首页
 
+平台总控页，主要回答：
+
+- 当前试验是否稳定
+- 当前处于哪个生育阶段
+- 哪些小区存在高风险
+- 当前是否进入关键窗口
+- 应该进入哪个下一级页面继续分析
+
+首页当前包含：
+
 - KPI 总览
-- 协同决策建议
-- 实时风险预警
-- 棚室实时监测快照
-- 默认示例数据与演示稿一致
+- 全生育期时间轴与关键窗口状态
+- 关键实时参数概览
+- 24 小区试验矩阵总览
+- 当前报警与决策建议
 
-### 2. 棚室管理
+### 2. 田间监测
 
-- 棚室卡片示例数据展示
-- 运行状态筛选
-- 搜索棚室名称 / 作物
-- 详细数据弹窗
-- 设备控制弹窗
-- 新增棚室
-- 默认优先展示演示稿中的 `A区番茄棚 / B区黄瓜棚 / C区草莓棚`
+单小区全过程监测页，包含：
 
-### 3. 报警中心
+- 整季过程
+- 关键窗口
+- 田间记录
+- 科研样品
 
-- 分类筛选
-- 报警列表展示
-- 单条报警处理
-- 批量标记已处理
-- 导出 CSV 记录
-- 默认展示 6 条演示报警数据
+“整季过程”当前包含：
 
-### 4. 数据分析
+- 实时参数卡
+- 设备状态区
+- 全生育期田面水位变化曲线
+- 全生育期土壤张力变化曲线
+- 温度 / 湿度 / CO₂ 日变化
+- PAR / 光照 / 冠层温度与降雨响应
 
-- 当前为前端静态演示页
-- 保留原型中的多维分析视觉展示
+### 3. 试验管理
 
-### 5. 试验管理
+科研试验执行中台，当前包含：
 
-- 当前为前端静态演示页
-- 已恢复演示版默认试验数据
+- 试验概况
+- 试验设计可视化
+- 关键事件日历
+- 数据采集计划
+- 样品管理
+- 数据完整性面板
+- “主—再关键期专题”入口卡
 
-### 6. 系统设置
+### 4. 主—再关键期专题页
 
-- 基本信息
-- 报警规则
-- 通知策略
-- 集成中心
-- 数据与安全
-- 运维审计
-- 该模块已接入后端与 SQLite 持久化
+位于：
 
-## 当前实现状态
+- `/experiments/ratoon-water-window`
 
-| 模块 | 状态 | 说明 |
-| --- | --- | --- |
-| 首页 | 已完成 | 演示态优先，支持接口拉取与示例数据兜底 |
-| 棚室管理 | 已完成 | 演示态优先，支持详情、控制、新增棚室 |
-| 报警中心 | 已完成 | 演示态优先，支持处理、批量处理、导出 |
-| 系统设置 | 已完成 | 已接入 Fastify + SQLite 持久化 |
-| 数据分析 | 演示版 | 当前为静态原型页面 |
-| 试验管理 | 演示版 | 当前为静态原型页面 |
+当前用于承载更学术、更专题化的深入展示，包括：
 
-## 项目结构
+- 窗口期总览
+- 水分控制分析
+- 芽启动分析
+- 气体脉冲分析
+- 根际过程分析
+- 13C 碳分配分析
 
-```text
-AgriNexus/
-├── frontend/                     # React 前端
-│   ├── src/
-│   │   ├── components/           # 通用组件、布局组件
-│   │   ├── config/               # 导航配置
-│   │   ├── data/                 # 演示数据
-│   │   ├── hooks/                # 全局 AppShell Hook
-│   │   ├── layouts/              # 主布局
-│   │   ├── lib/                  # Axios 实例
-│   │   ├── pages/                # 页面模块
-│   │   └── services/             # API 请求封装
-│   ├── index.html
-│   ├── package.json
-│   ├── tailwind.config.cjs
-│   └── vite.config.js
-├── backend/                      # Fastify 后端
-│   ├── data/                     # SQLite 数据文件
-│   ├── src/
-│   │   ├── database/             # 建库、种子、重置、校验
-│   │   ├── repositories/         # 数据访问与业务逻辑
-│   │   ├── routes/               # API 路由
-│   │   ├── app.js                # Fastify 应用注册
-│   │   └── server.js             # 服务入口
-│   └── package.json
-├── package.json                  # Monorepo workspace 根配置
-└── README.md
-```
+### 5. 数据分析
+
+通用科研数据中心，分为两层：
+
+- 整季过程分析
+- 关键窗口机制分析（摘要版）
+
+### 6. 预警中心
+
+科研试验报警平台，覆盖：
+
+- 水分控制类报警
+- 设备通讯类报警
+- 试验执行类报警
+
+### 7. 设备与网关
+
+物联网工程页，当前展示：
+
+- 田间监测节点
+- LoRa 网关
+- 4G 上行链路
+- 电源与通讯状态
+- 固件、缓存、心跳与传感器健康
+
+### 8. 系统设置
+
+底层配置页，当前展示：
+
+- 报警阈值配置
+- 水分控制规则
+- 传感器校准记录
+- 用户权限
+- 数据导出
+- 备份与恢复
+- API 接入
+- 日志审计
 
 ## 前端路由
 
 | 路由 | 页面 |
 | --- | --- |
 | `/` | 首页 |
-| `/greenhouses` | 棚室管理 |
-| `/alerts` | 报警中心 |
+| `/monitoring` | 田间监测 |
+| `/experiments` | 试验管理 |
+| `/experiments/ratoon-water-window` | 主—再关键期专题页 |
 | `/analysis` | 数据分析 |
-| `/research` | 试验管理 |
+| `/alerts` | 预警中心 |
+| `/devices` | 设备与网关 |
 | `/settings` | 系统设置 |
 
-## 后端接口概览
+兼容跳转：
+
+- `/greenhouses` -> `/monitoring`
+- `/research` -> `/experiments`
+
+## 后端接口
+
+当前后端主要提供演示数据与基础配置接口：
 
 ### 基础
 
 - `GET /health`
 
-### 仪表盘
+### 首页 / 总览
 
 - `GET /api/dashboard`
 
-### 棚室管理
+### 小区与监测对象
 
 - `GET /api/greenhouses`
-- `GET /api/greenhouses/:greenhouseId`
-- `POST /api/greenhouses`
-- `PUT /api/greenhouses/:greenhouseId/control`
 
-### 报警中心
+### 预警
 
 - `GET /api/alerts`
 - `PUT /api/alerts/:alertId/resolve`
 - `PUT /api/alerts/resolve-all`
 - `POST /api/alerts/export`
 
-### 决策中心
+### 决策
 
 - `POST /api/decisions/:decisionId/approve`
 - `POST /api/decisions/:decisionId/ignore`
@@ -202,29 +216,54 @@ AgriNexus/
 - `POST /api/settings/snapshots/:snapshotId/restore`
 - `POST /api/settings/logs/archive`
 
+## 项目结构
+
+```text
+AgriNexus/
+├── frontend/
+│   ├── src/
+│   │   ├── components/        # 平台组件、布局组件
+│   │   ├── config/            # 导航与页面标题配置
+│   │   ├── data/              # 页面演示数据与平台 mock 数据
+│   │   ├── hooks/             # App shell / message 等 hooks
+│   │   ├── layouts/           # 主布局
+│   │   ├── lib/               # axios 实例等基础库
+│   │   └── pages/             # 页面模块
+│   └── package.json
+├── backend/
+│   ├── data/                  # SQLite 数据文件
+│   ├── src/
+│   │   ├── database/          # 数据库初始化、重置、校验
+│   │   ├── repositories/      # 数据访问层
+│   │   ├── routes/            # API 路由
+│   │   ├── app.js             # Fastify 应用构建
+│   │   └── server.js          # 服务入口
+│   └── package.json
+├── package.json               # workspace 根配置
+└── README.md
+```
+
 ## 本地开发
 
 ### 环境要求
 
 - Node.js 18+
 - npm 9+
-- macOS / Linux / Windows 均可
 
-> 本项目当前在本机使用 `nvm` 管理 Node。  
-> 如果你的 shell 没有自动加载 `nvm`，执行命令前请先运行：
+如果当前 shell 没有自动加载 `nvm`，先执行：
 
 ```bash
 source ~/.nvm/nvm.sh
 ```
 
-### 1. 安装依赖
+### 安装依赖
 
 ```bash
 source ~/.nvm/nvm.sh
 npm install
 ```
 
-### 2. 启动前端
+### 启动前端
 
 ```bash
 source ~/.nvm/nvm.sh
@@ -233,9 +272,9 @@ npm run dev:frontend
 
 默认地址：
 
-- 前端：[http://127.0.0.1:5173](http://127.0.0.1:5173)
+- 本机：[http://localhost:5173/](http://localhost:5173/)
 
-### 3. 启动后端
+### 启动后端
 
 ```bash
 source ~/.nvm/nvm.sh
@@ -244,203 +283,56 @@ npm run dev:backend
 
 默认地址：
 
-- 后端：[http://127.0.0.1:3001](http://127.0.0.1:3001)
+- 本机：[http://127.0.0.1:3001/](http://127.0.0.1:3001/)
+- 健康检查：[http://127.0.0.1:3001/health](http://127.0.0.1:3001/health)
 
-健康检查：
-
-- [http://127.0.0.1:3001/health](http://127.0.0.1:3001/health)
-
-## 数据库说明
-
-项目使用 `SQLite`，主要数据文件位于：
-
-- `backend/data/smart-agri.db`
-
-### 常用数据库脚本
-
-初始化数据库：
+### 常用命令
 
 ```bash
-source ~/.nvm/nvm.sh
-npm run db:init --workspace backend
-```
+# 构建前端
+npm run build:frontend
 
-写入种子数据：
+# 后端数据库校验
+npm run db:verify --workspace backend
 
-```bash
-source ~/.nvm/nvm.sh
-npm run db:seed --workspace backend
-```
-
-重置数据库：
-
-```bash
-source ~/.nvm/nvm.sh
+# 重置数据库
 npm run db:reset --workspace backend
 ```
 
-校验数据库：
+## 跨设备访问
 
-```bash
-source ~/.nvm/nvm.sh
-npm run db:verify --workspace backend
-```
+当前开发环境已兼容局域网访问：
 
-### 当前种子数据包含
+- 前端默认监听 Vite 开发地址
+- 后端默认监听 `0.0.0.0:3001`
+- 开发态 CORS 允许 `localhost`、`127.0.0.1` 和常见局域网地址访问
+- 前端默认 API 地址会跟随当前页面主机名拼接 `:3001/api`
 
-- 园区
-- 用户
-- 棚室
-- 棚室档案
-- 传感快照
-- 报警记录
-- 决策建议
-- 试验项目
-- 系统设置相关配置
+这意味着在同一局域网内，用其他设备打开前端页面时，可以直接连到当前机器上的后端。
 
-## 构建
+## 数据库说明
 
-前端构建：
+项目当前使用 SQLite。
 
-```bash
-source ~/.nvm/nvm.sh
-npm run build:frontend
-```
+实际数据库文件路径由后端代码固定为：
 
-后端生产启动：
+- `backend/data/smart-agri.db`
 
-```bash
-source ~/.nvm/nvm.sh
-npm run start:backend
-```
+说明：
 
-## 环境变量
+- 品牌已经重构为 `AgriNexus`
+- 但数据库文件名当前仍为 `smart-agri.db`
+- 这是当前实现状态，不是文档笔误
 
-### 前端
+## 当前状态
 
-可选环境变量：
+当前仓库的重点是：
 
-- `VITE_API_BASE_URL`
-
-默认值：
-
-```bash
-http://127.0.0.1:3001/api
-```
-
-### 后端
-
-可选环境变量：
-
-- `PORT`
-- `HOST`
-
-默认值：
-
-- `PORT=3001`
-- `HOST=0.0.0.0`
-
-## 演示数据策略
-
-为了保证演示体验，当前项目对部分页面采用了“演示态优先”策略：
-
-- 首页
-- 棚室管理
-- 报警中心
-
-这意味着：
-
-- 页面默认会优先展示和原型/演示稿一致的示例数据
-- 当接口可用时，会在不破坏演示视觉的前提下融合后端数据
-- 当接口不可用时，会自动回退到示例数据
-
-这种策略适合当前“先还原界面，再逐步补全真实业务”的开发阶段。
-
-## 适合继续扩展的方向
-
-- 将试验管理改造成完整 CRUD
-- 将数据分析改造成真实统计接口驱动
-- 为棚室管理补独立详情页
-- 增加角色权限管理
-- 增加统一审计中心
-- 增加图表库接入
-- 增加 CI / 自动化构建流程
-
-## 常见问题
-
-### 1. 为什么页面有些地方显示的是示例数据？
-
-这是当前版本的设计选择。  
-首页、棚室管理、报警中心需要优先保持和演示稿一致，因此默认启用了示例数据优先展示。
-
-### 2. 为什么命令前要先执行 `source ~/.nvm/nvm.sh`？
-
-因为当前本机的 Node.js 是通过 `nvm` 安装的，如果 shell 没有自动加载 `nvm`，直接运行 `npm` 相关命令可能失败。
-
-### 3. 数据库重置后数据去哪了？
-
-重置命令会重新根据种子脚本写入初始数据。如果你手动新增的数据需要保留，建议先备份数据库文件。
-
-### 4. 前端接口超时怎么办？
-
-先确认后端是否已启动：
-
-- [http://127.0.0.1:3001/health](http://127.0.0.1:3001/health)
-
-如果后端未启动，首页、棚室管理、报警中心仍会回退到示例数据，但系统设置等依赖持久化的模块会受到影响。
-
-## 开发说明
-
-这个仓库当前更偏向“可持续迭代的高保真产品工程骨架”，而不是一次性演示页面。  
-因此你会在仓库里同时看到：
-
-- 原型级视觉页面
-- 可运行的前后端服务
-- SQLite 本地数据库
-- 可复用的服务层
-- 适合后续逐步演进的目录结构
-
-如果你希望继续往生产级方向推进，建议按下面顺序扩展：
-
-1. 完成试验管理后端接口与数据库设计
-2. 将数据分析改为真实后端统计
-3. 补权限、审计、日志与部署流程
+- UI 与页面信息架构持续迭代
+- 前端页面可直接运行和展示
+- 后端接口可为首页、预警、设置等模块提供真实响应
+- 适合作为科研项目汇报原型、交互演示和后续开发底座
 
 ## 仓库地址
 
-- GitHub: [https://github.com/zhangsxphd/AgriNexus](https://github.com/zhangsxphd/AgriNexus)
-
-## 更新日志
-
-### v2.0 — 生产级加固（2026-04-19）
-
-#### 后端
-- 新增 `helpers/shared.js` 共享工具模块，消除 3 处重复定义
-- `getNextId` 添加表名白名单，防止 SQL 注入
-- CORS 从 `origin: true` 改为白名单限制，并增加 5174 端口支持
-- 新增 `setErrorHandler` 统一处理 404/409/500 错误
-- 新增安全响应头（X-Content-Type-Options / X-Frame-Options / X-XSS-Protection）
-- 请求体大小限制 1 MB
-- Dashboard `getDashboardBundle` 查询优化，避免全量加载
-- `createGreenhouse` 接口输入层净化处理
-
-#### 前端布局
-- 侧边栏：移动端汉堡菜单 + 滑入抽屉 + 滚动穿透控制
-- 顶栏：响应式胶囊换行 + 移动端左侧留白
-- 全局底部 padding 增大，避免内容紧贴边缘
-- 报警/设备/设置/监测 4 页表格增加横向滚动支持
-- 设置/分析/监测 3 页 Tabs 增加横向滚动支持
-- 报警页 Grid 堆叠断点调优（xl -> lg）
-- HeatMatrix 组件添加横向滚动
-
-#### 前端交互
-- 修复 DashboardPage `useEffect` 无限重渲染（`useRef` 替代 `.length` 依赖）
-- 修复 GreenhousesPage `useEffect` 无限重渲染
-- 修复 Dashboard 棚室卡片直接导航到 `/monitoring`
-- 用户菜单改进为点击全局任意位置关闭
-- Modal 添加 ESC 键关闭 + 背景滚动锁定 + ARIA 属性支持
-- Toast 组件添加进入/滑出动画 + 延时销毁机制
-
-#### 工程化
-- 完善 `.gitignore` 文件，增加构建缓存、环境变量忽略规则
-- 新增 `.env.example`，集中管理环境变量示例
+- GitHub: [git@github.com:zhangsxphd/AgriNexus.git](git@github.com:zhangsxphd/AgriNexus.git)

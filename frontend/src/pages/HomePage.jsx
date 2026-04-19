@@ -14,7 +14,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import {
   ActionButton,
-  LineChartPanel,
   MetricTile,
   Panel,
   PlotMatrix,
@@ -197,35 +196,6 @@ export default function HomePage() {
             </div>
           </Panel>
         </div>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-2">
-        <Panel title="全生育期田面水位变化曲线" subtitle="分处理比较浅水、落干与复水过程，叠加关键事件标记。" icon={CloudRain}>
-          <LineChartPanel
-            labels={dashboardData.seasonCharts.stageLabels}
-            series={dashboardData.seasonCharts.waterLevel}
-            markers={dashboardData.seasonCharts.markers}
-          />
-        </Panel>
-
-        <Panel title="全生育期土壤张力变化曲线" subtitle="用于判断阈值控制稳定性与关键窗口进入状态。" icon={Waves}>
-          <LineChartPanel
-            labels={dashboardData.seasonCharts.stageLabels}
-            series={dashboardData.seasonCharts.tension}
-            markers={dashboardData.seasonCharts.markers}
-          />
-        </Panel>
-
-        <Panel title="温度 / 湿度 / CO₂ 日变化" subtitle="支持科研分析中的环境背景判读与时段回溯。" icon={LineChart}>
-          <LineChartPanel labels={dashboardData.seasonCharts.stageLabels} series={dashboardData.seasonCharts.atmosphere} markers={dashboardData.seasonCharts.markers} />
-        </Panel>
-
-        <Panel title="PAR / 光照 / 冠层温度与降雨响应" subtitle="用于识别降雨事件、辐射变化与冠层热响应的耦合关系。" icon={Gauge}>
-          <LineChartPanel labels={dashboardData.seasonCharts.stageLabels} series={dashboardData.seasonCharts.radiation} markers={dashboardData.seasonCharts.markers} />
-          <div className="mt-4">
-            <LineChartPanel labels={dashboardData.seasonCharts.stageLabels} series={dashboardData.seasonCharts.rainfall} markers={dashboardData.seasonCharts.markers} height={210} />
-          </div>
-        </Panel>
       </div>
     </div>
   );

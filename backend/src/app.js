@@ -19,7 +19,16 @@ export async function buildApp() {
   // CORS：生产环境通过 CORS_ORIGIN 环境变量限制来源，开发环境允许本地访问
   const corsOrigin = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map((s) => s.trim())
-    : ['http://127.0.0.1:5173', 'http://localhost:5173', 'http://127.0.0.1:5174', 'http://localhost:5174'];
+    : (origin, callback) => {
+        // 开发环境允许本机与局域网页面访问，兼容 Vite 端口变化和局域网调试。
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+
+        const localOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2}|169\.254(?:\.\d{1,3}){2})(:\d+)?$/;
+        callback(null, localOriginPattern.test(origin));
+      };
 
   await app.register(cors, {
     origin: corsOrigin,
@@ -48,7 +57,7 @@ export async function buildApp() {
 
   app.get('/health', async () => ({
     status: 'ok',
-    service: 'smart-agri-backend',
+    service: 'agrinexus-backend',
   }));
 
   await app.register(dashboardRoutes, { prefix: '/api/dashboard' });

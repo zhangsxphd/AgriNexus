@@ -1,4 +1,4 @@
-import { Activity, Database, FlaskConical, Radio, Waves } from 'lucide-react';
+import { Activity, CloudRain, Database, FlaskConical, Gauge, LineChart, Radio, Waves } from 'lucide-react';
 import { useState } from 'react';
 import {
   ActionButton,
@@ -9,7 +9,7 @@ import {
   StatusBadge,
   Tabs,
 } from '../components/platform/PlatformUI';
-import { monitoringData } from '../data/platformData';
+import { dashboardData, monitoringData } from '../data/platformData';
 import { useAppShell } from '../hooks/useAppShell';
 
 export default function FieldMonitoringPage() {
@@ -43,7 +43,7 @@ export default function FieldMonitoringPage() {
         <>
           <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
             <Panel title="实时参数卡" subtitle="自动连续采集参数按科研监测语义展开。" icon={Activity}>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5">
                 {monitoringData.seasonMetrics.map((metric) => (
                   <MetricTile
                     key={metric.label}
@@ -52,7 +52,10 @@ export default function FieldMonitoringPage() {
                     unit={metric.unit}
                     status={metric.status}
                     tone={metric.tone}
+                    trend={metric.trend}
                     series={metric.series}
+                    valueGroups={metric.valueGroups}
+                    variant="square"
                   />
                 ))}
               </div>
@@ -70,26 +73,45 @@ export default function FieldMonitoringPage() {
             </Panel>
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-3">
-            <Panel title="全生育期水位与张力" subtitle="呈现整季水分调控轨迹与阈值接近情况。" className="xl:col-span-2" icon={Waves}>
-              <LineChartPanel labels={monitoringData.seasonCharts.labels} series={monitoringData.seasonCharts.waterAndTension} markers={monitoringData.seasonCharts.markers} />
-            </Panel>
-            <Panel title="关键事件点" subtitle="用于回溯收割、复水、采样与施肥节点。" icon={FlaskConical}>
-              <div className="space-y-3">
-                {monitoringData.seasonCharts.markers.map((item) => (
-                  <div key={item.label} className="rounded-[22px] border border-slate-200 bg-white p-4">
-                    <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-                    <p className="mt-1 text-xs text-slate-500">时间轴位置：第 {item.index + 1} 段</p>
-                  </div>
-                ))}
-              </div>
+          <div className="grid gap-6 xl:grid-cols-2">
+            <Panel title="全生育期田面水位变化曲线" subtitle="分处理比较浅水、落干与复水过程，叠加关键事件标记。" icon={CloudRain}>
+              <LineChartPanel
+                labels={dashboardData.seasonCharts.stageLabels}
+                series={dashboardData.seasonCharts.waterLevel}
+                markers={dashboardData.seasonCharts.markers}
+              />
             </Panel>
 
-            <Panel title="温湿度 / CO₂ 过程" subtitle="整季环境背景与群体微气候过程对比。" className="xl:col-span-2" icon={Activity}>
-              <LineChartPanel labels={monitoringData.seasonCharts.labels} series={monitoringData.seasonCharts.atmosphere} markers={monitoringData.seasonCharts.markers} />
+            <Panel title="全生育期土壤张力变化曲线" subtitle="用于判断阈值控制稳定性与关键窗口进入状态。" icon={Waves}>
+              <LineChartPanel
+                labels={dashboardData.seasonCharts.stageLabels}
+                series={dashboardData.seasonCharts.tension}
+                markers={dashboardData.seasonCharts.markers}
+              />
             </Panel>
-            <Panel title="PAR / 风速 / 降雨" subtitle="服务异常点解释与事件归因。" icon={Database}>
-              <LineChartPanel labels={monitoringData.seasonCharts.labels} series={monitoringData.seasonCharts.climate} markers={monitoringData.seasonCharts.markers} />
+
+            <Panel title="温度 / 湿度 / CO₂ 日变化" subtitle="支持科研分析中的环境背景判读与时段回溯。" icon={LineChart}>
+              <LineChartPanel
+                labels={dashboardData.seasonCharts.stageLabels}
+                series={dashboardData.seasonCharts.atmosphere}
+                markers={dashboardData.seasonCharts.markers}
+              />
+            </Panel>
+
+            <Panel title="PAR / 光照 / 冠层温度与降雨响应" subtitle="用于识别降雨事件、辐射变化与冠层热响应的耦合关系。" icon={Gauge}>
+              <LineChartPanel
+                labels={dashboardData.seasonCharts.stageLabels}
+                series={dashboardData.seasonCharts.radiation}
+                markers={dashboardData.seasonCharts.markers}
+              />
+              <div className="mt-4">
+                <LineChartPanel
+                  labels={dashboardData.seasonCharts.stageLabels}
+                  series={dashboardData.seasonCharts.rainfall}
+                  markers={dashboardData.seasonCharts.markers}
+                  height={210}
+                />
+              </div>
             </Panel>
           </div>
         </>

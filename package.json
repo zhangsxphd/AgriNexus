@@ -1,11 +1,14 @@
 {
-  "name": "smart-agri-platform",
+  "name": "agrinexus-platform",
   "private": true,
   "version": "1.0.0",
   "workspaces": [
     "frontend",
     "backend"
   ],
+  "overrides": {
+    "follow-redirects": "^1.16.0"
+  },
   "scripts": {
     "dev:frontend": "npm run dev --workspace frontend",
     "dev:backend": "npm run dev --workspace backend",
