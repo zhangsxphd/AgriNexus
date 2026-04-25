@@ -1,5 +1,6 @@
 import { pathToFileURL } from 'node:url';
 import { initializeDatabase } from './init.js';
+import { ensurePlatformSeeded } from '../repositories/platformRepository.js';
 import {
   activityLogs,
   alerts,
@@ -31,6 +32,19 @@ function isDirectExecution() {
 
 function clearTables(db) {
   db.exec(`
+    DELETE FROM field_sync_events;
+    DELETE FROM field_rules;
+    DELETE FROM field_stage_events;
+    DELETE FROM field_samples;
+    DELETE FROM field_tasks;
+    DELETE FROM field_alerts;
+    DELETE FROM field_readings;
+    DELETE FROM field_nodes;
+    DELETE FROM field_gateways;
+    DELETE FROM field_plots;
+    DELETE FROM field_varieties;
+    DELETE FROM field_treatments;
+    DELETE FROM field_experiments;
     DELETE FROM activity_logs;
     DELETE FROM config_snapshots;
     DELETE FROM operations_settings;
@@ -329,6 +343,7 @@ export function seedDatabase(db = initializeDatabase()) {
   });
 
   transaction();
+  ensurePlatformSeeded(db);
 
   return {
     parks: parks.length,
@@ -344,6 +359,9 @@ export function seedDatabase(db = initializeDatabase()) {
     rules: systemRules.length,
     integrations: integrationServices.length,
     snapshots: configSnapshots.length,
+    fieldExperiments: db.prepare('SELECT COUNT(*) AS value FROM field_experiments').get().value,
+    fieldPlots: db.prepare('SELECT COUNT(*) AS value FROM field_plots').get().value,
+    fieldReadings: db.prepare('SELECT COUNT(*) AS value FROM field_readings').get().value,
   };
 }
 

@@ -165,11 +165,87 @@
 
 ## 后端接口
 
-当前后端主要提供演示数据与基础配置接口：
+后端当前采用兼容式结构：
+
+- 旧 Smart-Agri 接口继续保留，避免破坏已有演示骨架
+- 新增 AgriNexus 田间试验接口，用于小区、节点、读数、报警、样品、规则与同步
+- 前端当前仍主要使用本地演示数据，后续可以逐步切换到 `/api/platform/*`
 
 ### 基础
 
 - `GET /health`
+
+### AgriNexus 平台接口
+
+- `GET /api/platform/dashboard`
+- `GET /api/platform/experiment`
+- `GET /api/platform/treatments`
+- `GET /api/platform/plots`
+- `GET /api/platform/plots/:plotCode`
+- `PATCH /api/platform/plots/:plotCode`
+- `GET /api/platform/readings`
+- `GET /api/platform/alerts`
+- `PATCH /api/platform/alerts/:alertCode`
+- `GET /api/platform/devices/gateways`
+- `GET /api/platform/devices/nodes`
+- `GET /api/platform/tasks`
+- `GET /api/platform/samples`
+- `POST /api/platform/samples`
+- `GET /api/platform/timeline`
+- `GET /api/platform/rules`
+- `PATCH /api/platform/rules/:code`
+- `GET /api/platform/sync/changes`
+- `POST /api/platform/sync/batch`
+
+### IoT 接入接口
+
+- `POST /api/iot/ingest`
+- `POST /api/iot/heartbeat`
+
+`/api/iot/ingest` 可接收 ESP32-S3 后续上报的数据。当前支持的常用字段包括：
+
+- `plotCode`
+- `nodeCode` / `deviceId`
+- `timestamp`
+- `metrics.temp`
+- `metrics.hum`
+- `metrics.waterLevelCm`
+- `metrics.soilTensionKpa`
+- `metrics.uvA`
+- `metrics.uvB`
+- `metrics.uvC`
+- `metrics.latitude`
+- `metrics.longitude`
+- `metrics.altitudeM`
+- `metrics.batteryV`
+- `metrics.loraRssi`
+
+示例：
+
+```bash
+curl -X POST http://127.0.0.1:3001/api/iot/ingest \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "plotCode": "P14",
+    "nodeCode": "ESP32-S3-P14",
+    "timestamp": "2026-04-25T12:00:00+08:00",
+    "metrics": {
+      "temp": 28.5,
+      "hum": 72,
+      "uvA": 1.23,
+      "uvB": 0.18,
+      "uvC": 0,
+      "batteryV": 4.01,
+      "loraRssi": -88,
+      "latitude": 31.2987,
+      "longitude": 120.5853
+    }
+  }'
+```
+
+### 旧兼容接口
+
+这些接口保留用于兼容早期页面与旧演示数据。
 
 ### 首页 / 总览
 
@@ -323,6 +399,9 @@ npm run db:reset --workspace backend
 - 品牌已经重构为 `AgriNexus`
 - 但数据库文件名当前仍为 `smart-agri.db`
 - 这是当前实现状态，不是文档笔误
+- 数据库中同时包含旧兼容表与新的 AgriNexus 田间试验表
+- 新表采用 `field_*` 前缀，例如 `field_plots`、`field_readings`、`field_alerts`
+- 后端启动或执行 `db:verify` 时，会非破坏性初始化 AgriNexus 演示数据
 
 ## 当前状态
 

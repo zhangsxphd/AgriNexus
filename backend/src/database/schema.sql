@@ -304,6 +304,257 @@ CREATE TABLE IF NOT EXISTS activity_logs (
   occurred_at TEXT NOT NULL
 );
 
+-- AgriNexus domain tables. These tables intentionally coexist with the legacy
+-- Smart-Agri greenhouse tables so the current demo frontend and older APIs keep
+-- working while the field-trial backend is migrated in-place.
+CREATE TABLE IF NOT EXISTS field_experiments (
+  id INTEGER PRIMARY KEY,
+  code TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  project_name TEXT NOT NULL,
+  crop_name TEXT NOT NULL,
+  year INTEGER NOT NULL,
+  season_name TEXT NOT NULL,
+  station_name TEXT NOT NULL,
+  design_type TEXT NOT NULL,
+  treatment_count INTEGER NOT NULL,
+  plot_count INTEGER NOT NULL,
+  current_stage_key TEXT NOT NULL,
+  current_stage_label TEXT NOT NULL,
+  current_window_label TEXT,
+  status TEXT NOT NULL CHECK (status IN ('planned', 'running', 'paused', 'archived')),
+  started_on TEXT NOT NULL,
+  harvest_on TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS field_treatments (
+  id INTEGER PRIMARY KEY,
+  experiment_id INTEGER NOT NULL REFERENCES field_experiments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  code TEXT NOT NULL,
+  name TEXT NOT NULL,
+  treatment_type TEXT NOT NULL,
+  description TEXT,
+  color_key TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (experiment_id, code)
+);
+
+CREATE TABLE IF NOT EXISTS field_varieties (
+  id INTEGER PRIMARY KEY,
+  experiment_id INTEGER NOT NULL REFERENCES field_experiments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  code TEXT NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (experiment_id, code)
+);
+
+CREATE TABLE IF NOT EXISTS field_plots (
+  id INTEGER PRIMARY KEY,
+  experiment_id INTEGER NOT NULL REFERENCES field_experiments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  plot_code TEXT NOT NULL UNIQUE,
+  treatment_code TEXT NOT NULL,
+  variety_code TEXT NOT NULL,
+  repeat_no INTEGER NOT NULL,
+  area_type TEXT NOT NULL,
+  status TEXT NOT NULL,
+  phase_label TEXT NOT NULL,
+  window_label TEXT,
+  online INTEGER NOT NULL DEFAULT 1 CHECK (online IN (0, 1)),
+  water_level_cm REAL,
+  soil_tension_kpa REAL,
+  battery_v REAL,
+  lora_rssi INTEGER,
+  alert_count INTEGER NOT NULL DEFAULT 0,
+  last_reported_at TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (experiment_id, treatment_code, variety_code, repeat_no)
+);
+
+CREATE TABLE IF NOT EXISTS field_gateways (
+  id INTEGER PRIMARY KEY,
+  gateway_code TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  location TEXT NOT NULL,
+  network_type TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('online', 'warning', 'offline', 'maintenance')),
+  battery_v REAL,
+  rssi INTEGER,
+  upload_success_rate REAL,
+  cache_count INTEGER NOT NULL DEFAULT 0,
+  firmware_version TEXT,
+  last_heartbeat_at TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS field_nodes (
+  id INTEGER PRIMARY KEY,
+  node_code TEXT NOT NULL UNIQUE,
+  plot_id INTEGER REFERENCES field_plots(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  gateway_id INTEGER REFERENCES field_gateways(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  name TEXT NOT NULL,
+  node_type TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('online', 'warning', 'offline', 'maintenance')),
+  battery_v REAL,
+  lora_rssi INTEGER,
+  upload_success_rate REAL,
+  cache_count INTEGER NOT NULL DEFAULT 0,
+  firmware_version TEXT,
+  last_heartbeat_at TEXT,
+  sensor_health_json TEXT NOT NULL DEFAULT '{}',
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS field_readings (
+  id INTEGER PRIMARY KEY,
+  plot_id INTEGER NOT NULL REFERENCES field_plots(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  node_id INTEGER REFERENCES field_nodes(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  recorded_at TEXT NOT NULL,
+  water_level_cm REAL,
+  soil_tension_kpa REAL,
+  air_temperature_c REAL,
+  air_humidity_percent REAL,
+  co2_ppm REAL,
+  par_umol_m2_s REAL,
+  light_klx REAL,
+  wind_speed_mps REAL,
+  rainfall_mm REAL,
+  canopy_temperature_c REAL,
+  water_temperature_c REAL,
+  soil_temperature_c REAL,
+  soil_ec_ms_cm REAL,
+  soil_ph REAL,
+  uv_a REAL,
+  uv_b REAL,
+  uv_c REAL,
+  latitude REAL,
+  longitude REAL,
+  altitude_m REAL,
+  battery_v REAL,
+  lora_rssi INTEGER,
+  valve_open_count INTEGER,
+  valve_total_count INTEGER,
+  raw_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (plot_id, recorded_at)
+);
+
+CREATE TABLE IF NOT EXISTS field_alerts (
+  id INTEGER PRIMARY KEY,
+  experiment_id INTEGER NOT NULL REFERENCES field_experiments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  plot_id INTEGER REFERENCES field_plots(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  alert_code TEXT NOT NULL UNIQUE,
+  category TEXT NOT NULL,
+  alert_type TEXT NOT NULL,
+  level TEXT NOT NULL CHECK (level IN ('低', '中', '高', '严重')),
+  message TEXT NOT NULL,
+  current_value TEXT,
+  threshold_value TEXT,
+  duration_minutes INTEGER,
+  recommended_action TEXT,
+  status TEXT NOT NULL DEFAULT '未处理' CHECK (status IN ('未处理', '已处理', '已忽略')),
+  occurred_at TEXT NOT NULL,
+  handled_at TEXT,
+  handled_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  handling_note TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS field_tasks (
+  id INTEGER PRIMARY KEY,
+  experiment_id INTEGER NOT NULL REFERENCES field_experiments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  task_code TEXT NOT NULL UNIQUE,
+  task_type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  plot_scope TEXT,
+  scheduled_at TEXT,
+  completed_at TEXT,
+  status TEXT NOT NULL CHECK (status IN ('待执行', '进行中', '已完成', '已逾期', '已取消')),
+  owner_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  note TEXT,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS field_samples (
+  id INTEGER PRIMARY KEY,
+  experiment_id INTEGER NOT NULL REFERENCES field_experiments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  plot_id INTEGER REFERENCES field_plots(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  sample_code TEXT NOT NULL UNIQUE,
+  sample_type TEXT NOT NULL,
+  event_label TEXT,
+  collected_at TEXT,
+  analysis_status TEXT NOT NULL CHECK (analysis_status IN ('待采集', '已采集', '检测中', '已回填', '异常')),
+  lab_fill_status TEXT NOT NULL CHECK (lab_fill_status IN ('待回填', '部分回填', '已回填', '无需回填')),
+  result_json TEXT NOT NULL DEFAULT '{}',
+  note TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS field_stage_events (
+  id INTEGER PRIMARY KEY,
+  experiment_id INTEGER NOT NULL REFERENCES field_experiments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  event_key TEXT NOT NULL,
+  event_type TEXT NOT NULL CHECK (event_type IN ('full_season', 'key_window')),
+  label TEXT NOT NULL,
+  event_date TEXT,
+  duration_to_next_days INTEGER,
+  status TEXT NOT NULL CHECK (status IN ('done', 'current', 'upcoming', 'future')),
+  note TEXT,
+  sort_order INTEGER NOT NULL,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (experiment_id, event_type, event_key)
+);
+
+CREATE TABLE IF NOT EXISTS field_rules (
+  id INTEGER PRIMARY KEY,
+  code TEXT NOT NULL UNIQUE,
+  category TEXT NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  metric_key TEXT,
+  comparison_operator TEXT,
+  threshold_value REAL,
+  threshold_text TEXT,
+  unit TEXT,
+  duration_minutes INTEGER,
+  action_mode TEXT,
+  enabled INTEGER NOT NULL DEFAULT 1 CHECK (enabled IN (0, 1)),
+  updated_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS field_sync_events (
+  id INTEGER PRIMARY KEY,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  action TEXT NOT NULL CHECK (action IN ('create', 'update', 'delete', 'ingest')),
+  payload_json TEXT NOT NULL DEFAULT '{}',
+  source TEXT NOT NULL DEFAULT 'api',
+  actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+  occurred_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_users_park_id ON users (park_id);
 CREATE INDEX IF NOT EXISTS idx_greenhouses_park_id ON greenhouses (park_id);
 CREATE INDEX IF NOT EXISTS idx_greenhouse_profiles_manager ON greenhouse_profiles (manager_user_id);
@@ -318,3 +569,15 @@ CREATE INDEX IF NOT EXISTS idx_efficiency_snapshots_scope_month ON efficiency_sn
 CREATE INDEX IF NOT EXISTS idx_config_snapshots_created_at ON config_snapshots (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_occurred_at ON activity_logs (occurred_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_archived_occurred_at ON activity_logs (archived, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_field_plots_experiment ON field_plots (experiment_id, treatment_code, variety_code, repeat_no);
+CREATE INDEX IF NOT EXISTS idx_field_plots_status ON field_plots (status, online);
+CREATE INDEX IF NOT EXISTS idx_field_nodes_plot ON field_nodes (plot_id);
+CREATE INDEX IF NOT EXISTS idx_field_nodes_gateway ON field_nodes (gateway_id);
+CREATE INDEX IF NOT EXISTS idx_field_readings_plot_time ON field_readings (plot_id, recorded_at DESC);
+CREATE INDEX IF NOT EXISTS idx_field_alerts_status_time ON field_alerts (status, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_field_alerts_plot ON field_alerts (plot_id, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS idx_field_tasks_status_time ON field_tasks (status, scheduled_at DESC);
+CREATE INDEX IF NOT EXISTS idx_field_samples_experiment_status ON field_samples (experiment_id, analysis_status, lab_fill_status);
+CREATE INDEX IF NOT EXISTS idx_field_stage_events_experiment_type_order ON field_stage_events (experiment_id, event_type, sort_order);
+CREATE INDEX IF NOT EXISTS idx_field_rules_category_enabled ON field_rules (category, enabled);
+CREATE INDEX IF NOT EXISTS idx_field_sync_events_occurred_at ON field_sync_events (occurred_at DESC);

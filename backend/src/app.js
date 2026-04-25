@@ -5,8 +5,11 @@ import { alertRoutes } from './routes/alerts.js';
 import { dashboardRoutes } from './routes/dashboard.js';
 import { decisionRoutes } from './routes/decisions.js';
 import { greenhouseRoutes } from './routes/greenhouses.js';
+import { iotRoutes } from './routes/iot.js';
+import { platformRoutes } from './routes/platform.js';
 import { settingsRoutes } from './routes/settings.js';
 import { userRoutes } from './routes/users.js';
+import { ensurePlatformSeeded } from './repositories/platformRepository.js';
 
 export async function buildApp() {
   const app = Fastify({
@@ -15,6 +18,7 @@ export async function buildApp() {
   });
 
   initializeDatabase();
+  ensurePlatformSeeded();
 
   // CORS：生产环境通过 CORS_ORIGIN 环境变量限制来源，开发环境允许本地访问
   const corsOrigin = process.env.CORS_ORIGIN
@@ -61,6 +65,8 @@ export async function buildApp() {
   }));
 
   await app.register(dashboardRoutes, { prefix: '/api/dashboard' });
+  await app.register(platformRoutes, { prefix: '/api/platform' });
+  await app.register(iotRoutes, { prefix: '/api/iot' });
   await app.register(greenhouseRoutes, { prefix: '/api/greenhouses' });
   await app.register(alertRoutes, { prefix: '/api/alerts' });
   await app.register(decisionRoutes, { prefix: '/api/decisions' });
